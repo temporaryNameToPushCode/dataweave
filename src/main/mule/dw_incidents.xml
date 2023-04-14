@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="373c52e6-6b22-46b6-b946-33f22e648258" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dw_incidentsFlow" doc:id="292bd00f-6deb-48ef-b936-4efca0311dfe" >
+		<http:listener doc:name="Listener" doc:id="4b98772c-5ee5-4bf1-a4b1-f07af02fed03" config-ref="HTTP_Listener_config" path="/dw"/>
+		<ee:transform doc:name="Transform Message" doc:id="63ea4e22-0a6e-4a0c-8010-f65b8f50990a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"name":"yathendra" ,
+	"rno":402 ,
+	"city":"vgr"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="check the payload before using indent = false" doc:id="bbc77409-da8f-4da8-852c-2f9e0c0f82fd" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+		<logger level="INFO" doc:name="indent = false" doc:id="307dff4d-5ed3-47aa-ab9a-661dee2ac680" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;payload]"/>
+		<logger level="INFO" doc:name="Masking field in object" doc:id="d6575256-ccbf-4641-976b-746dcf41a574" message='#[%dw 2.0&#10;output application/json&#10;import * from dw::util::Values&#10;---&#10;{&#10;	"1":payload mask field("rno") with "xxxxx" ,&#10;	"2":payload mask "city" with "aaaaax"&#10;}]'/>
+		<logger level="INFO" doc:name="masking 2 fields in object" doc:id="d2094baa-c34f-4759-92a9-49a1f24c50c1" message='#[%dw 2.0&#10;output application/json&#10;import * from dw::util::Values&#10;---&#10;payload mask field("rno") with "xxxxx" mask field("city") with "yyyy"]'/>
+		<logger level="INFO" doc:name="by using masking we can alter the index value" doc:id="932979d1-897f-41b3-8d62-0edd4db2d970" message='#[%dw 2.0&#10;output application/json&#10;import * from dw::util::Values&#10;---&#10;[[1,2,3],[4,5,6],[7,8,9]] mask 2 with 0]'/>
+		<flow-ref doc:name="Flow Reference" doc:id="b530cbf9-17cd-4d40-b3be-b252e91764a1" name="dw_incidentsFlow2"/>
+	</flow>
+	<flow name="dw_incidentsFlow2" doc:id="51d6fc07-10c4-4258-b5b1-475c71b28ad6" initialState="started">
+		<logger level="INFO" doc:name="keys with values" doc:id="e2a73617-ba3b-48b1-8eed-ddce9f6f8d38" message='#[%dw 2.0&#10;output application/json&#10;var a = {&#10;	"name":"yathendra" ,&#10;	"rno":402 ,&#10;	"city":"vgr"&#10;}&#10;---&#10;a pluck{&#10;	($$):$ ,    // (key):value&#10;	"$($$)":$  //"$(key):value"&#10;}]'/>
+	</flow>
+</mule>

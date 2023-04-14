@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_51d6fc07_10c4_4258_b5b1_475c71b28ad6_Input_Payload = {|
+  name: String, 
+  rno: Number, 
+  city: String
+|}
+
